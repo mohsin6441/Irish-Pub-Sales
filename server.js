@@ -85,6 +85,117 @@ app.get("/api/staff", (req, res) => {
 ========================================================= */
 
 async function sendDiscordShiftNotification(type, shift) {
+    async function sendDiscordSaleNotification(sale) {
+    const webhookUrl = process.env.DISCORD_SALES_WEBHOOK_URL;
+
+    if (!webhookUrl) {
+        console.log("Discord sales webhook not configured.");
+        return;
+    }
+
+    let itemLines = (sale.items || [])
+        .map(item => {
+            const quantity = Number(item.quantity || 0);
+            const price = Number(item.price || 0);
+            return `• ${item.name} × ${quantity} — $${(price * quantity).toFixed(2)}`;
+        })
+        .join("\n");
+
+    if (!itemLines) {
+        itemLines = "No items";
+    }
+
+    if (itemLines.length > 1024) {
+        itemLines = itemLines.slice(0, 1021) + "...";
+    }
+
+    const saleTime = new Date(
+        sale.createdAt || Date.now()
+    ).toLocaleString("en-MY", {
+        timeZone: "Asia/Kuala_Lumpur"
+    });
+
+    const embed = {
+        title: "🧾 NEW SALE",
+        description: "A new sale has been completed at Irish Pub.",
+        color: 0xD4AF37,
+
+        fields: [
+            {
+                name: "👤 Staff",
+                value: sale.staffName || sale.username || "Unknown",
+                inline: true
+            },
+            {
+                name: "🕐 Time",
+                value: saleTime,
+                inline: true
+            },
+            {
+                name: "🛒 Items",
+                value: itemLines,
+                inline: false
+            },
+            {
+                name: "💰 Subtotal",
+                value: `$${Number(sale.subtotal || 0).toFixed(2)}`,
+                inline: true
+            },
+            {
+                name: "🏷️ Discount",
+                value: `$${Number(sale.discount || 0).toFixed(2)}`,
+                inline: true
+            },
+            {
+                name: "🧾 Tax 5%",
+                value: `$${Number(sale.tax || 0).toFixed(2)}`,
+                inline: true
+            },
+            {
+                name: "💵 Grand Total",
+                value: `$${Number(sale.total || 0).toFixed(2)}`,
+                inline: false
+            }
+        ],
+
+        footer: {
+            text: "Irish Pub • Developed By Mohsin"
+        },
+
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                embeds: [embed]
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+
+            console.error(
+                "Discord sales webhook error:",
+                response.status,
+                errorText
+            );
+
+            return;
+        }
+
+        console.log("Discord sale notification sent.");
+    } catch (error) {
+        console.error(
+            "Discord sales webhook connection error:",
+            error
+        );
+    }
+}
 
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
@@ -569,6 +680,7 @@ app.post("/api/sales", (req, res) => {
 
 
     sales.push(sale);
+    sendDiscordSaleNotification(sale);
 
 
     console.log(
