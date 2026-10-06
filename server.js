@@ -1,8 +1,9 @@
 const express = require("express");
 const path = require("path");
+require("dotenv").config();
 
 const app = express();
-require("dotenv").config();
+
 const PORT = process.env.PORT || 3000;
 
 
@@ -66,7 +67,6 @@ app.get("/", (req, res) => {
 
 /* =========================================================
    STAFF LIST
-   THIS IS THE MAIN SOURCE OF CURRENT ROLES
 ========================================================= */
 
 app.get("/api/staff", (req, res) => {
@@ -80,104 +80,492 @@ app.get("/api/staff", (req, res) => {
    FIND STAFF
 ========================================================= */
 
+function findStaff(username) {
+
+    return staff.find(
+        user => user.username === username
+    );
+
+}
+
+
 /* =========================================================
    DISCORD SHIFT NOTIFICATION
+   SHIFT WEBHOOK ONLY
 ========================================================= */
 
 async function sendDiscordShiftNotification(type, shift) {
-    async function sendDiscordSaleNotification(sale) {
-    const webhookUrl = process.env.DISCORD_SALES_WEBHOOK_URL;
+
+    const webhookUrl =
+        process.env.DISCORD_WEBHOOK_URL;
 
     if (!webhookUrl) {
-        console.log("Discord sales webhook not configured.");
+
+        console.log(
+            "Discord shift webhook not configured."
+        );
+
         return;
     }
 
-    let itemLines = (sale.items || [])
-        .map(item => {
-            const quantity = Number(item.quantity || 0);
-            const price = Number(item.price || 0);
-            return `• ${item.name} × ${quantity} — $${(price * quantity).toFixed(2)}`;
-        })
-        .join("\n");
+    let embed;
 
-    if (!itemLines) {
-        itemLines = "No items";
+
+    /* =====================================================
+       SHIFT START
+    ===================================================== */
+
+    if (type === "start") {
+
+        embed = {
+
+            title: "🟢 SHIFT STARTED",
+
+            description:
+                "A staff member has started their shift.",
+
+            fields: [
+
+                {
+                    name: "👤 Staff",
+                    value: shift.staffName,
+                    inline: true
+                },
+
+                {
+                    name: "🏷️ Position",
+                    value: shift.role,
+                    inline: true
+                },
+
+                {
+                    name: "🕐 Start Time",
+
+                    value:
+                        new Date(
+                            shift.startedAt
+                        ).toLocaleString(
+                            "en-MY",
+                            {
+                                timeZone:
+                                    "Asia/Kuala_Lumpur"
+                            }
+                        ),
+
+                    inline: false
+                }
+
+            ],
+
+            footer: {
+                text:
+                    "Irish Pub • Developed By Mohsin"
+            },
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
     }
 
-    if (itemLines.length > 1024) {
-        itemLines = itemLines.slice(0, 1021) + "...";
+
+    /* =====================================================
+       SHIFT END
+    ===================================================== */
+
+    else if (type === "end") {
+
+        const hours =
+            Math.floor(
+                shift.duration / 3600
+            );
+
+        const minutes =
+            Math.floor(
+                (shift.duration % 3600) / 60
+            );
+
+        const seconds =
+            shift.duration % 60;
+
+
+        const totalTime =
+            `${String(hours).padStart(2, "0")}:` +
+            `${String(minutes).padStart(2, "0")}:` +
+            `${String(seconds).padStart(2, "0")}`;
+
+
+        embed = {
+
+            title: "🔴 SHIFT ENDED",
+
+            description:
+                "A staff member has ended their shift.",
+
+            fields: [
+
+                {
+                    name: "👤 Staff",
+                    value: shift.staffName,
+                    inline: true
+                },
+
+                {
+                    name: "🏷️ Position",
+                    value: shift.role,
+                    inline: true
+                },
+
+                {
+                    name: "🟢 Shift Start",
+
+                    value:
+                        new Date(
+                            shift.startedAt
+                        ).toLocaleString(
+                            "en-MY",
+                            {
+                                timeZone:
+                                    "Asia/Kuala_Lumpur"
+                            }
+                        ),
+
+                    inline: false
+                },
+
+                {
+                    name: "🔴 Shift End",
+
+                    value:
+                        new Date(
+                            shift.endedAt
+                        ).toLocaleString(
+                            "en-MY",
+                            {
+                                timeZone:
+                                    "Asia/Kuala_Lumpur"
+                            }
+                        ),
+
+                    inline: false
+                },
+
+                {
+                    name: "⏱️ Total Duty Time",
+
+                    value:
+                        `**${totalTime}**`,
+
+                    inline: false
+                }
+
+            ],
+
+            footer: {
+                text:
+                    "Irish Pub • Developed By Mohsin"
+            },
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
     }
 
-    const saleTime = new Date(
-        sale.createdAt || Date.now()
-    ).toLocaleString("en-MY", {
-        timeZone: "Asia/Kuala_Lumpur"
-    });
 
-    const embed = {
-        title: "🧾 NEW SALE",
-        description: "A new sale has been completed at Irish Pub.",
-        color: 0xD4AF37,
-
-        fields: [
-            {
-                name: "👤 Staff",
-                value: sale.staffName || sale.username || "Unknown",
-                inline: true
-            },
-            {
-                name: "🕐 Time",
-                value: saleTime,
-                inline: true
-            },
-            {
-                name: "🛒 Items",
-                value: itemLines,
-                inline: false
-            },
-            {
-                name: "💰 Subtotal",
-                value: `$${Number(sale.subtotal || 0).toFixed(2)}`,
-                inline: true
-            },
-            {
-                name: "🏷️ Discount",
-                value: `$${Number(sale.discount || 0).toFixed(2)}`,
-                inline: true
-            },
-            {
-                name: "🧾 Tax 5%",
-                value: `$${Number(sale.tax || 0).toFixed(2)}`,
-                inline: true
-            },
-            {
-                name: "💵 Grand Total",
-                value: `$${Number(sale.total || 0).toFixed(2)}`,
-                inline: false
-            }
-        ],
-
-        footer: {
-            text: "Irish Pub • Developed By Mohsin"
-        },
-
-        timestamp: new Date().toISOString()
-    };
+    /* =====================================================
+       SEND SHIFT WEBHOOK
+    ===================================================== */
 
     try {
-        const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                embeds: [embed]
-            })
-        });
+
+        const response =
+            await fetch(
+                webhookUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            embeds: [embed]
+                        })
+                }
+            );
+
 
         if (!response.ok) {
-            const errorText = await response.text();
+
+            const errorText =
+                await response.text();
+
+            console.error(
+                "Discord shift webhook error:",
+                response.status,
+                errorText
+            );
+
+            return;
+        }
+
+
+        console.log(
+            `Discord shift ${type} notification sent.`
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Discord shift webhook connection error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   DISCORD SALES NOTIFICATION
+   SALES WEBHOOK ONLY
+========================================================= */
+
+async function sendDiscordSaleNotification(sale) {
+
+    const webhookUrl =
+        process.env.DISCORD_SALES_WEBHOOK_URL;
+
+
+    if (!webhookUrl) {
+
+        console.log(
+            "Discord sales webhook not configured."
+        );
+
+        return;
+    }
+
+
+    /* =====================================================
+       ITEM LIST
+    ===================================================== */
+
+    let itemLines =
+        (sale.items || [])
+
+            .map(item => {
+
+                const quantity =
+                    Number(
+                        item.quantity || 0
+                    );
+
+                const price =
+                    Number(
+                        item.price || 0
+                    );
+
+
+                return (
+                    `• ${item.name} × ${quantity} — ` +
+                    `$${(price * quantity).toFixed(2)}`
+                );
+
+            })
+
+            .join("\n");
+
+
+    if (!itemLines) {
+
+        itemLines = "No items";
+
+    }
+
+
+    /* =====================================================
+       DISCORD FIELD LIMIT
+    ===================================================== */
+
+    if (itemLines.length > 1024) {
+
+        itemLines =
+            itemLines.slice(0, 1021) +
+            "...";
+
+    }
+
+
+    /* =====================================================
+       SALE TIME
+    ===================================================== */
+
+    const saleTime =
+
+        new Date(
+            sale.createdAt || Date.now()
+        ).toLocaleString(
+            "en-MY",
+            {
+                timeZone:
+                    "Asia/Kuala_Lumpur"
+            }
+        );
+
+
+    /* =====================================================
+       SALE EMBED
+    ===================================================== */
+
+    const embed = {
+
+        title: "🧾 NEW SALE",
+
+        description:
+            "A new sale has been completed at Irish Pub.",
+
+        color: 0xD4AF37,
+
+
+        fields: [
+
+            {
+                name: "👤 Staff",
+
+                value:
+                    sale.staffName ||
+                    sale.username ||
+                    "Unknown",
+
+                inline: true
+            },
+
+
+            {
+                name: "🕐 Time",
+
+                value:
+                    saleTime,
+
+                inline: true
+            },
+
+
+            {
+                name: "🛒 Items",
+
+                value:
+                    itemLines,
+
+                inline: false
+            },
+
+
+            {
+                name: "💰 Subtotal",
+
+                value:
+                    `$${Number(
+                        sale.subtotal || 0
+                    ).toFixed(2)}`,
+
+                inline: true
+            },
+
+
+            {
+                name: "🏷️ Discount",
+
+                value:
+                    `$${Number(
+                        sale.discount || 0
+                    ).toFixed(2)}`,
+
+                inline: true
+            },
+
+
+            {
+                name: "🧾 Tax 5%",
+
+                value:
+                    `$${Number(
+                        sale.tax || 0
+                    ).toFixed(2)}`,
+
+                inline: true
+            },
+
+
+            {
+                name: "💵 Grand Total",
+
+                value:
+                    `$${Number(
+                        sale.total || 0
+                    ).toFixed(2)}`,
+
+                inline: false
+            }
+
+        ],
+
+
+        footer: {
+
+            text:
+                "Irish Pub • Developed By Mohsin"
+
+        },
+
+
+        timestamp:
+            new Date().toISOString()
+
+    };
+
+
+    /* =====================================================
+       SEND SALES WEBHOOK
+    ===================================================== */
+
+    try {
+
+        const response =
+            await fetch(
+                webhookUrl,
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+                            embeds: [embed]
+                        })
+
+                }
+            );
+
+
+        if (!response.ok) {
+
+            const errorText =
+                await response.text();
 
             console.error(
                 "Discord sales webhook error:",
@@ -188,164 +576,49 @@ async function sendDiscordShiftNotification(type, shift) {
             return;
         }
 
-        console.log("Discord sale notification sent.");
-    } catch (error) {
+
+        console.log(
+            "Discord sale notification sent."
+        );
+
+    }
+
+    catch (error) {
+
         console.error(
             "Discord sales webhook connection error:",
             error
         );
+
     }
+
 }
 
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-
-    if (!webhookUrl) {
-        console.log("Discord webhook not configured.");
-        return;
-    }
-
-    let embed;
-
-    if (type === "start") {
-
-        embed = {
-            title: "🟢 SHIFT STARTED",
-            description: "A staff member has started their shift.",
-            fields: [
-                {
-                    name: "👤 Staff",
-                    value: shift.staffName,
-                    inline: true
-                },
-                {
-                    name: "🏷️ Position",
-                    value: shift.role,
-                    inline: true
-                },
-                {
-                    name: "🕐 Start Time",
-                    value: new Date(shift.startedAt).toLocaleString("en-MY", {
-                        timeZone: "Asia/Kuala_Lumpur"
-                    }),
-                    inline: false
-                }
-            ],
-            footer: {
-                text: "Irish Pub • Developed By Mohsin"
-            },
-            timestamp: new Date().toISOString()
-        };
-
-    } else if (type === "end") {
-
-        const hours = Math.floor(shift.duration / 3600);
-        const minutes = Math.floor(
-            (shift.duration % 3600) / 60
-        );
-        const seconds = shift.duration % 60;
-
-        const totalTime =
-            `${String(hours).padStart(2, "0")}:` +
-            `${String(minutes).padStart(2, "0")}:` +
-            `${String(seconds).padStart(2, "0")}`;
-
-        embed = {
-            title: "🔴 SHIFT ENDED",
-            description: "A staff member has ended their shift.",
-            fields: [
-                {
-                    name: "👤 Staff",
-                    value: shift.staffName,
-                    inline: true
-                },
-                {
-                    name: "🏷️ Position",
-                    value: shift.role,
-                    inline: true
-                },
-                {
-                    name: "🟢 Shift Start",
-                    value: new Date(shift.startedAt).toLocaleString("en-MY", {
-                        timeZone: "Asia/Kuala_Lumpur"
-                    }),
-                    inline: false
-                },
-                {
-                    name: "🔴 Shift End",
-                    value: new Date(shift.endedAt).toLocaleString("en-MY", {
-                        timeZone: "Asia/Kuala_Lumpur"
-                    }),
-                    inline: false
-                },
-                {
-                    name: "⏱️ Total Duty Time",
-                    value: `**${totalTime}**`,
-                    inline: false
-                }
-            ],
-            footer: {
-                text: "Irish Pub • Developed By Mohsin"
-            },
-            timestamp: new Date().toISOString()
-        };
-    }
-
-    try {
-
-        const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                embeds: [embed]
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-
-            console.error(
-                "Discord webhook error:",
-                response.status,
-                errorText
-            );
-
-            return;
-        }
-
-        console.log(
-            `Discord shift ${type} notification sent.`
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Discord webhook connection error:",
-            error
-        );
-
-    }
-}
 
 /* =========================================================
    MANAGEMENT ACCESS
    OWNER + MANAGER
 ========================================================= */
-function findStaff(username) {
-    return staff.find(user => user.username === username);
-}
+
 function hasManagementAccess(username) {
 
-    const user = findStaff(username);
+    const user =
+        findStaff(username);
+
 
     if (!user) {
+
         return false;
+
     }
 
+
     return (
+
         user.role === "Owner" ||
+
         user.role === "Manager"
+
     );
 
 }
@@ -355,351 +628,459 @@ function hasManagementAccess(username) {
    SHIFT START
 ========================================================= */
 
-app.post("/api/shift/start", (req, res) => {
+app.post(
+    "/api/shift/start",
+    (req, res) => {
 
-    const { username } = req.body;
-
-    const user = findStaff(username);
-
-    if (!user) {
-
-        return res.status(401).json({
-            success: false,
-            message: "Staff not found."
-        });
-
-    }
+        const { username } =
+            req.body;
 
 
-    const existingShift = shifts.find(
-        shift =>
-            shift.username === user.username &&
-            shift.active === true
-    );
+        const user =
+            findStaff(username);
 
 
-    if (existingShift) {
+        if (!user) {
 
-        return res.status(400).json({
-            success: false,
-            message:
-                "You already have an active shift.",
+            return res.status(401).json({
+
+                success: false,
+
+                message:
+                    "Staff not found."
+
+            });
+
+        }
+
+
+        const existingShift =
+            shifts.find(
+                shift =>
+                    shift.username ===
+                        user.username &&
+                    shift.active === true
+            );
+
+
+        if (existingShift) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "You already have an active shift.",
+
+                startedAt:
+                    existingShift.startedAt
+
+            });
+
+        }
+
+
+        const shift = {
+
+            id:
+                Date.now(),
+
+            username:
+                user.username,
+
+            staffName:
+                user.name,
+
+            role:
+                user.role,
+
             startedAt:
-                existingShift.startedAt
+                new Date().toISOString(),
+
+            endedAt:
+                null,
+
+            active:
+                true,
+
+            duration:
+                0
+
+        };
+
+
+        shifts.push(shift);
+
+
+        console.log(
+            `SHIFT STARTED: ${user.name}`
+        );
+
+
+        /* =================================================
+           SEND SHIFT START DISCORD
+        ================================================= */
+
+        sendDiscordShiftNotification(
+            "start",
+            shift
+        );
+
+
+        res.json({
+
+            success: true,
+
+            message:
+                "Shift started successfully.",
+
+            startedAt:
+                shift.startedAt,
+
+            shift
+
         });
 
     }
-
-
-    const shift = {
-
-        id: Date.now(),
-
-        username:
-            user.username,
-
-        staffName:
-            user.name,
-
-        role:
-            user.role,
-
-        startedAt:
-            new Date().toISOString(),
-
-        endedAt:
-            null,
-
-        active:
-            true,
-
-        duration:
-            0
-
-    };
-
-
-    shifts.push(shift);
-
-
-    console.log(
-        `SHIFT STARTED: ${user.name}`
-    );
-sendDiscordShiftNotification("start", shift);
-
-    res.json({
-
-        success: true,
-
-        message:
-            "Shift started successfully.",
-
-        startedAt:
-            shift.startedAt,
-
-        shift
-
-    });
-
-});
+);
 
 
 /* =========================================================
    CURRENT SHIFT
 ========================================================= */
 
-app.get("/api/shift/current", (req, res) => {
+app.get(
+    "/api/shift/current",
+    (req, res) => {
 
-    const { username } = req.query;
+        const { username } =
+            req.query;
 
-    const user = findStaff(username);
 
-    if (!user) {
+        const user =
+            findStaff(username);
 
-        return res.status(401).json({
-            success: false,
-            message:
-                "Staff not found."
+
+        if (!user) {
+
+            return res.status(401).json({
+
+                success: false,
+
+                message:
+                    "Staff not found."
+
+            });
+
+        }
+
+
+        const shift =
+            shifts.find(
+                item =>
+                    item.username ===
+                        user.username &&
+                    item.active === true
+            );
+
+
+        if (!shift) {
+
+            return res.json({
+
+                active: false
+
+            });
+
+        }
+
+
+        res.json({
+
+            active: true,
+
+            startedAt:
+                shift.startedAt,
+
+            shift
+
         });
 
     }
-
-
-    const shift = shifts.find(
-        item =>
-            item.username === user.username &&
-            item.active === true
-    );
-
-
-    if (!shift) {
-
-        return res.json({
-            active: false
-        });
-
-    }
-
-
-    res.json({
-
-        active: true,
-
-        startedAt:
-            shift.startedAt,
-
-        shift
-
-    });
-
-});
+);
 
 
 /* =========================================================
    SHIFT END
 ========================================================= */
 
-app.post("/api/shift/end", (req, res) => {
+app.post(
+    "/api/shift/end",
+    (req, res) => {
 
-    const { username } = req.body;
-
-    const user = findStaff(username);
-
-    if (!user) {
-
-        return res.status(401).json({
-            success: false,
-            message:
-                "Staff not found."
-        });
-
-    }
+        const { username } =
+            req.body;
 
 
-    const shift = shifts.find(
-        item =>
-            item.username === user.username &&
-            item.active === true
-    );
+        const user =
+            findStaff(username);
 
 
-    if (!shift) {
+        if (!user) {
 
-        return res.status(400).json({
-            success: false,
-            message:
-                "No active shift found."
-        });
+            return res.status(401).json({
 
-    }
+                success: false,
 
+                message:
+                    "Staff not found."
 
-    const endedAt =
-        new Date();
+            });
 
-    const startedAt =
-        new Date(shift.startedAt);
+        }
 
 
-    const duration =
-        Math.floor(
-            (endedAt - startedAt) / 1000
+        const shift =
+            shifts.find(
+                item =>
+                    item.username ===
+                        user.username &&
+                    item.active === true
+            );
+
+
+        if (!shift) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "No active shift found."
+
+            });
+
+        }
+
+
+        const endedAt =
+            new Date();
+
+
+        const startedAt =
+            new Date(
+                shift.startedAt
+            );
+
+
+        const duration =
+            Math.floor(
+                (endedAt - startedAt) /
+                    1000
+            );
+
+
+        shift.endedAt =
+            endedAt.toISOString();
+
+
+        shift.active =
+            false;
+
+
+        shift.duration =
+            Math.max(
+                0,
+                duration
+            );
+
+
+        console.log(
+            `SHIFT ENDED: ${user.name} - ${duration}s`
         );
 
 
-    shift.endedAt =
-        endedAt.toISOString();
+        /* =================================================
+           SEND SHIFT END DISCORD
+        ================================================= */
 
-    shift.active =
-        false;
+        sendDiscordShiftNotification(
+            "end",
+            shift
+        );
 
-    shift.duration =
-        Math.max(0, duration);
 
+        res.json({
 
-    console.log(
-        `SHIFT ENDED: ${user.name} - ${duration}s`
-    );
-sendDiscordShiftNotification("end", shift);
+            success: true,
 
-    res.json({
+            message:
+                "Shift ended successfully.",
 
-        success: true,
+            endedAt:
+                shift.endedAt,
 
-        message:
-            "Shift ended successfully.",
+            duration:
+                shift.duration,
 
-        endedAt:
-            shift.endedAt,
+            shift
 
-        duration:
-            shift.duration,
+        });
 
-        shift
-
-    });
-
-});
+    }
+);
 
 
 /* =========================================================
    SALES
 ========================================================= */
 
-app.post("/api/sales", (req, res) => {
+app.post(
+    "/api/sales",
+    (req, res) => {
 
-    const {
-        username,
-        staffName,
-        items,
-        subtotal,
-        discount,
-        tax,
-        total
-    } = req.body;
+        const {
 
+            username,
 
-    const user =
-        findStaff(username);
+            staffName,
 
+            items,
 
-    if (!user) {
+            subtotal,
 
-        return res.status(401).json({
-            success: false,
-            message:
-                "Staff not found."
-        });
+            discount,
 
-    }
+            tax,
+
+            total
+
+        } = req.body;
 
 
-    const activeShift =
-        shifts.find(
-            shift =>
-                shift.username ===
-                    user.username &&
-                shift.active === true
+        const user =
+            findStaff(username);
+
+
+        if (!user) {
+
+            return res.status(401).json({
+
+                success: false,
+
+                message:
+                    "Staff not found."
+
+            });
+
+        }
+
+
+        const activeShift =
+            shifts.find(
+                shift =>
+                    shift.username ===
+                        user.username &&
+                    shift.active === true
+            );
+
+
+        if (!activeShift) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "Please start your shift before making a sale."
+
+            });
+
+        }
+
+
+        if (
+
+            !Array.isArray(items) ||
+
+            items.length === 0
+
+        ) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message:
+                    "No items in sale."
+
+            });
+
+        }
+
+
+        const sale = {
+
+            id:
+                Date.now(),
+
+            username:
+                user.username,
+
+            staffName:
+                user.name,
+
+            items,
+
+            subtotal:
+                Number(subtotal) || 0,
+
+            discount:
+                Number(discount) || 0,
+
+            tax:
+                Number(tax) || 0,
+
+            total:
+                Number(total) || 0,
+
+            createdAt:
+                new Date().toISOString()
+
+        };
+
+
+        sales.push(sale);
+
+
+        /* =================================================
+           SEND SALE TO SALES DISCORD WEBHOOK
+           NOT SHIFT WEBHOOK
+        ================================================= */
+
+        sendDiscordSaleNotification(
+            sale
         );
 
 
-    if (!activeShift) {
+        console.log(
+            `SALE: ${sale.staffName} - $${sale.total.toFixed(2)}`
+        );
 
-        return res.status(400).json({
-            success: false,
+
+        res.json({
+
+            success: true,
+
             message:
-                "Please start your shift before making a sale."
+                "Sale completed successfully.",
+
+            sale
+
         });
 
     }
-
-
-    if (
-        !Array.isArray(items) ||
-        items.length === 0
-    ) {
-
-        return res.status(400).json({
-            success: false,
-            message:
-                "No items in sale."
-        });
-
-    }
-
-
-    const sale = {
-
-        id:
-            Date.now(),
-
-        username:
-            user.username,
-
-        staffName:
-            user.name,
-
-        items,
-
-        subtotal:
-            Number(subtotal) || 0,
-
-        discount:
-            Number(discount) || 0,
-
-        tax:
-            Number(tax) || 0,
-
-        total:
-            Number(total) || 0,
-
-        createdAt:
-            new Date().toISOString()
-
-    };
-
-
-    sales.push(sale);
-    sendDiscordSaleNotification(sale);
-
-
-    console.log(
-        `SALE: ${sale.staffName} - $${sale.total.toFixed(2)}`
-    );
-
-
-    res.json({
-
-        success: true,
-
-        message:
-            "Sale completed successfully.",
-
-        sale
-
-    });
-
-});
+);
 
 
 /* =========================================================
@@ -707,204 +1088,224 @@ app.post("/api/sales", (req, res) => {
    ONLY OWNER + MANAGER
 ========================================================= */
 
-app.get("/api/dashboard", (req, res) => {
+app.get(
+    "/api/dashboard",
+    (req, res) => {
 
-    const { username } =
-        req.query;
-
-
-    /* =========================================
-       SERVER-SIDE PERMISSION CHECK
-    ========================================= */
-
-    if (!hasManagementAccess(username)) {
-
-        return res.status(403).json({
-
-            success: false,
-
-            message:
-                "Only Owner or Manager can access the dashboard."
-
-        });
-
-    }
+        const { username } =
+            req.query;
 
 
-    /* =========================================
-       TOTAL SALES
-    ========================================= */
+        /* ================================================
+           SERVER-SIDE PERMISSION CHECK
+        ================================================ */
 
-    const totalSales =
-        sales.reduce(
-            (sum, sale) =>
-                sum +
-                Number(sale.total || 0),
-            0
-        );
-
-
-    /* =========================================
-       TOTAL ORDERS
-    ========================================= */
-
-    const totalOrders =
-        sales.length;
-
-
-    /* =========================================
-       TOTAL DUTY TIME
-    ========================================= */
-
-    const totalDutyTime =
-        shifts.reduce(
-            (sum, shift) =>
-                sum +
-                Number(
-                    shift.duration || 0
-                ),
-            0
-        );
-
-
-    /* =========================================
-       TODAY SALES
-    ========================================= */
-
-    const today =
-        new Date()
-            .toISOString()
-            .split("T")[0];
-
-
-    const todaySales =
-        sales
-            .filter(
-                sale =>
-                    sale.createdAt &&
-                    sale.createdAt.startsWith(
-                        today
-                    )
+        if (
+            !hasManagementAccess(
+                username
             )
-            .reduce(
+        ) {
+
+            return res.status(403).json({
+
+                success: false,
+
+                message:
+                    "Only Owner or Manager can access the dashboard."
+
+            });
+
+        }
+
+
+        /* ================================================
+           TOTAL SALES
+        ================================================ */
+
+        const totalSales =
+            sales.reduce(
                 (sum, sale) =>
                     sum +
                     Number(
                         sale.total || 0
                     ),
+
                 0
             );
 
 
-    /* =========================================
-       STAFF PERFORMANCE
-    ========================================= */
+        /* ================================================
+           TOTAL ORDERS
+        ================================================ */
 
-    const staffPerformance =
-        staff.map(user => {
+        const totalOrders =
+            sales.length;
 
-            const userSales =
-                sales.filter(
+
+        /* ================================================
+           TOTAL DUTY TIME
+        ================================================ */
+
+        const totalDutyTime =
+            shifts.reduce(
+                (sum, shift) =>
+                    sum +
+                    Number(
+                        shift.duration || 0
+                    ),
+
+                0
+            );
+
+
+        /* ================================================
+           TODAY SALES
+        ================================================ */
+
+        const today =
+            new Date()
+                .toISOString()
+                .split("T")[0];
+
+
+        const todaySales =
+            sales
+
+                .filter(
                     sale =>
-                        sale.username ===
-                        user.username
-                );
+                        sale.createdAt &&
+                        sale.createdAt.startsWith(
+                            today
+                        )
+                )
 
-
-            const userSalesTotal =
-                userSales.reduce(
+                .reduce(
                     (sum, sale) =>
                         sum +
                         Number(
                             sale.total || 0
                         ),
+
                     0
                 );
 
 
-            const userDutyTime =
-                shifts
-                    .filter(
-                        shift =>
-                            shift.username ===
+        /* ================================================
+           STAFF PERFORMANCE
+        ================================================ */
+
+        const staffPerformance =
+            staff.map(user => {
+
+                const userSales =
+                    sales.filter(
+                        sale =>
+                            sale.username ===
                             user.username
-                    )
-                    .reduce(
-                        (sum, shift) =>
+                    );
+
+
+                const userSalesTotal =
+                    userSales.reduce(
+                        (sum, sale) =>
                             sum +
                             Number(
-                                shift.duration || 0
+                                sale.total || 0
                             ),
+
                         0
                     );
 
 
-            return {
+                const userDutyTime =
+                    shifts
 
-                username:
-                    user.username,
+                        .filter(
+                            shift =>
+                                shift.username ===
+                                user.username
+                        )
 
-                name:
-                    user.name,
+                        .reduce(
+                            (sum, shift) =>
+                                sum +
+                                Number(
+                                    shift.duration || 0
+                                ),
 
-                role:
-                    user.role,
+                            0
+                        );
 
-                orders:
-                    userSales.length,
 
-                sales:
-                    userSalesTotal,
+                return {
 
-                dutyTime:
-                    userDutyTime
+                    username:
+                        user.username,
 
-            };
+                    name:
+                        user.name,
+
+                    role:
+                        user.role,
+
+                    orders:
+                        userSales.length,
+
+                    sales:
+                        userSalesTotal,
+
+                    dutyTime:
+                        userDutyTime
+
+                };
+
+            });
+
+
+        /* ================================================
+           RECENT SALES
+        ================================================ */
+
+        const recentSales =
+            [...sales]
+
+                .sort(
+                    (a, b) =>
+                        new Date(
+                            b.createdAt
+                        ) -
+                        new Date(
+                            a.createdAt
+                        )
+                )
+
+                .slice(0, 10);
+
+
+        /* ================================================
+           RESPONSE
+        ================================================ */
+
+        res.json({
+
+            success: true,
+
+            totalSales,
+
+            totalOrders,
+
+            totalDutyTime,
+
+            todaySales,
+
+            staffPerformance,
+
+            recentSales
 
         });
 
-
-    /* =========================================
-       RECENT SALES
-    ========================================= */
-
-    const recentSales =
-        [...sales]
-            .sort(
-                (a, b) =>
-                    new Date(
-                        b.createdAt
-                    ) -
-                    new Date(
-                        a.createdAt
-                    )
-            )
-            .slice(0, 10);
-
-
-    /* =========================================
-       RESPONSE
-    ========================================= */
-
-    res.json({
-
-        success: true,
-
-        totalSales,
-
-        totalOrders,
-
-        totalDutyTime,
-
-        todaySales,
-
-        staffPerformance,
-
-        recentSales
-
-    });
-
-});
+    }
+);
 
 
 /* =========================================================
@@ -994,9 +1395,9 @@ app.post(
             );
 
 
-            /* =========================================
+            /* ==============================================
                FIND CURRENT USER
-            ========================================= */
+            ============================================== */
 
             const currentUser =
                 findStaff(username);
@@ -1016,13 +1417,16 @@ app.post(
             }
 
 
-            /* =========================================
+            /* ==============================================
                ONLY OWNER OR MANAGER
-            ========================================= */
+            ============================================== */
 
             if (
+
                 currentUser.role !== "Owner" &&
+
                 currentUser.role !== "Manager"
+
             ) {
 
                 return res.status(403).json({
@@ -1037,9 +1441,9 @@ app.post(
             }
 
 
-            /* =========================================
+            /* ==============================================
                VALIDATE CHANGES
-            ========================================= */
+            ============================================== */
 
             if (
                 !Array.isArray(changes)
@@ -1057,20 +1461,24 @@ app.post(
             }
 
 
-            /* =========================================
+            /* ==============================================
                ALLOWED ROLES
-            ========================================= */
+            ============================================== */
 
             const allowedRoles = [
+
                 "Owner",
+
                 "Manager",
+
                 "Staff"
+
             ];
 
 
-            /* =========================================
+            /* ==============================================
                VALIDATE EACH STAFF
-            ========================================= */
+            ============================================== */
 
             for (
                 const change
@@ -1078,9 +1486,13 @@ app.post(
             ) {
 
                 if (
+
                     !change ||
+
                     !change.username ||
+
                     !change.role
+
                 ) {
 
                     return res.status(400).json({
@@ -1135,10 +1547,9 @@ app.post(
             }
 
 
-            /* =========================================
+            /* ==============================================
                CALCULATE FINAL ROLES
-               BEFORE APPLYING
-            ========================================= */
+            ============================================== */
 
             const finalRoles =
                 staff.map(user => {
@@ -1168,9 +1579,9 @@ app.post(
                 });
 
 
-            /* =========================================
+            /* ==============================================
                MUST HAVE AT LEAST ONE OWNER
-            ========================================= */
+            ============================================== */
 
             const ownerCount =
                 finalRoles.filter(
@@ -1196,9 +1607,9 @@ app.post(
             }
 
 
-            /* =========================================
+            /* ==============================================
                APPLY ROLE CHANGES
-            ========================================= */
+            ============================================== */
 
             changes.forEach(
                 change => {
@@ -1226,9 +1637,9 @@ app.post(
             );
 
 
-            /* =========================================
+            /* ==============================================
                RETURN FRESH SERVER STAFF LIST
-            ========================================= */
+            ============================================== */
 
             return res.status(200).json({
 
@@ -1242,7 +1653,9 @@ app.post(
 
             });
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
             console.error(
                 "STAFF ROLE UPDATE ERROR:",
@@ -1269,122 +1682,56 @@ app.post(
 
 
 /* =========================================================
+   API 404
+   ALWAYS RETURN JSON FOR UNKNOWN API ROUTES
+========================================================= */
+
+app.use(
+    (req, res, next) => {
+
+        if (
+            req.path.startsWith("/api/")
+        ) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "API endpoint not found."
+
+            });
+
+        }
+
+        next();
+
+    }
+);
+
+
+/* =========================================================
+   SPA FALLBACK
+========================================================= */
+
+app.use(
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "index.html"
+            )
+        );
+
+    }
+);
+
+
+/* =========================================================
    SERVER START
 ========================================================= */
-app.post("/api/staff/roles", (req, res) => {
-    try {
-        const { username, changes } = req.body;
 
-        console.log("=================================");
-        console.log("STAFF ROLE UPDATE REQUEST");
-        console.log("BY:", username);
-        console.log("CHANGES:", changes);
-        console.log("=================================");
-
-        const currentUser = findStaff(username);
-
-        if (!currentUser) {
-            return res.status(401).json({
-                success: false,
-                message: "Staff not found."
-            });
-        }
-
-        if (currentUser.role !== "Owner" && currentUser.role !== "Manager") {
-            return res.status(403).json({
-                success: false,
-                message: "Only Owner or Manager can change staff positions."
-            });
-        }
-
-        if (!Array.isArray(changes)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid staff changes."
-            });
-        }
-
-        const allowedRoles = ["Owner", "Manager", "Staff"];
-
-        for (const change of changes) {
-
-            if (!change || !change.username || !change.role) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid staff data."
-                });
-            }
-
-            if (!allowedRoles.includes(change.role)) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid role."
-                });
-            }
-
-            const targetUser = findStaff(change.username);
-
-            if (!targetUser) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Staff not found: " + change.username
-                });
-            }
-        }
-
-        const finalRoles = staff.map(user => {
-
-            const change = changes.find(
-                item =>
-                    item.username.toLowerCase() ===
-                    user.username.toLowerCase()
-            );
-
-            return {
-                username: user.username,
-                role: change ? change.role : user.role
-            };
-        });
-
-        const ownerCount = finalRoles.filter(
-            user => user.role === "Owner"
-        ).length;
-
-        if (ownerCount < 1) {
-            return res.status(400).json({
-                success: false,
-                message: "There must always be at least one Owner."
-            });
-        }
-
-        changes.forEach(change => {
-
-            const targetUser = findStaff(change.username);
-
-            if (targetUser) {
-                targetUser.role = change.role;
-            }
-        });
-
-        console.log("UPDATED STAFF:", staff);
-
-        return res.json({
-            success: true,
-            message: "Staff positions updated successfully.",
-            staff: staff
-        });
-
-    } catch (error) {
-
-        console.error("STAFF ROLE UPDATE ERROR:", error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Server error while saving staff positions.",
-            error: error.message
-        });
-    }
-});
 app.listen(
     PORT,
     () => {
