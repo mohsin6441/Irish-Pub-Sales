@@ -221,7 +221,9 @@ async function sendDiscordShiftNotification(type, shift) {
    MANAGEMENT ACCESS
    OWNER + MANAGER
 ========================================================= */
-
+function findStaff(username) {
+    return staff.find(user => user.username === username);
+}
 function hasManagementAccess(username) {
 
     const user = findStaff(username);
