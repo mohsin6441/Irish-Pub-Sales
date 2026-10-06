@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Irish Pub | GTA RP Management</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                🍀
+            </div>
+
+            <div>
+                <h1>IRISH PUB</h1>
+                <span>GTA RP MANAGEMENT</span>
+            </div>
+
+        </div>
+
+
+        <!-- USER -->
+
+        <div class="user-box">
+
+            <div class="user-avatar">
+                M
+            </div>
+
+            <div class="user-info">
+
+                <strong id="userName">
+                    Loading...
+                </strong>
+
+                <span id="userRole">
+                    Loading...
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="navigation">
+
+            <button
+                class="nav-btn active"
+                id="homeNav"
+                data-page="home"
+                type="button">
+                <span>⌂</span>
+                Home
+            </button>
+
+
+            <button
+                class="nav-btn"
+                id="foodNav"
+                data-page="food"
+                type="button">
+                <span>🍽</span>
+                Food List
+            </button>
+
+
+            <button
+                class="nav-btn"
+                id="dashboardNav"
+                data-page="dashboard"
+                type="button">
+                <span>▦</span>
+                Dashboard
+            </button>
+
+
+            <button
+                class="nav-btn"
+                id="staffPositionNav"
+                data-page="staff"
+                type="button">
+                <span>👥</span>
+                Staff & Position
+            </button>
+
+        </nav>
+
+
+        <!-- SWITCH STAFF -->
+
+        <button
+            class="logout-btn"
+            id="logoutButton"
+            type="button">
+            ⇄ Switch Staff
+        </button>
+
+
+        <div class="sidebar-footer">
+            Developed By Mohsin
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             HOME
+        ================================================== -->
+
+        <section
+            class="page active"
+            id="homePage">
+
+            <div class="topbar">
+
+                <div>
+
+                    <span class="eyebrow">
+                        IRISH PUB
+                    </span>
+
+                    <h2>
+                        Welcome,
+                        <span id="welcomeName">
+                            Mohsin
+                        </span>
+                    </h2>
+
+                    <p>
+                        Manage your GTA RP pub operations.
+                    </p>
+
+                </div>
+
+
+                <div class="date-card">
+
+                    <span>
+                        TODAY
+                    </span>
+
+                    <strong id="currentDate">
+                        Loading...
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SHIFT -->
+
+            <div class="shift-card">
+
+                <div class="shift-left">
+
+                    <div class="shift-icon">
+                        🕐
+                    </div>
+
+                    <div>
+
+                        <div class="card-label">
+                            CURRENT SHIFT
+                        </div>
+
+                        <h3 id="shiftStatus">
+                            SHIFT OFF
+                        </h3>
+
+                        <p>
+                            Duty Time:
+                            <strong id="shiftTimer">
+                                00:00:00
+                            </strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="shift-button start"
+                    id="shiftButton"
+                    type="button">
+                    Start Shift
+                </button>
+
+            </div>
+
+
+
+            <!-- QUICK ACCESS -->
+
+            <div class="section-title">
+
+                <span class="eyebrow">
+                    QUICK ACCESS
+                </span>
+
+                <h2>
+                    Pub Operations
+                </h2>
+
+            </div>
+
+
+            <div class="quick-grid">
+
+
+                <button
+                    class="quick-card"
+                    data-page="food"
+                    type="button">
+
+                    <div class="quick-icon">
+                        🍽
+                    </div>
+
+                    <h3>
+                        Food List
+                    </h3>
+
+                    <p>
+                        View menu items and create customer orders.
+                    </p>
+
+                    <span>
+                        Open Food List →
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    data-page="dashboard"
+                    type="button">
+
+                    <div class="quick-icon">
+                        📊
+                    </div>
+
+                    <h3>
+                        Dashboard
+                    </h3>
+
+                    <p>
+                        View sales, orders and staff performance.
+                    </p>
+
+                    <span>
+                        Open Dashboard →
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             FOOD LIST / POS
+        ================================================== -->
+
+        <section
+            class="page"
+            id="foodPage">
+
+
+            <!-- FOOD PAGE HEADER -->
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="page-kicker">
+                        IRISH PUB
+                    </span>
+
+                    <h1>
+                        Food List
+                    </h1>
+
+                    <p>
+                        Select food and drinks to create a sale.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="pos-layout">
+
+
+                <!-- =================================================
+                     FOOD + DRINKS MENU
+                ================================================== -->
+
+                <div class="menu-container">
+
+
+                    <!-- ================= FOOD ================= -->
+
+                    <div class="menu-section">
+
+                        <div class="menu-section-header">
+
+                            <div>
+
+                                <span class="section-kicker">
+                                    IRISH PUB MENU
+                                </span>
+
+                                <h2>
+                                    Food Items
+                                </h2>
+
+                            </div>
+
+                            <span class="item-count">
+                                09 ITEMS
+                            </span>
+
+                        </div>
+
+
+                        <div class="menu-grid">
+
+
+                            <!-- S'MORES -->
+
+                            <div
+                                class="food-card"
+                                data-name="S'mores"
+                                data-price="40">
+
+                                <div class="food-image">
+                                    🍫
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        S'mores
+                                    </h3>
+
+                                    <span>
+                                        Sweet toasted marshmallow treat.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $40
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="S'mores"
+                                    data-price="40"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- SKITTLES -->
+
+                            <div
+                                class="food-card"
+                                data-name="Skittles"
+                                data-price="45">
+
+                                <div class="food-image">
+                                    🍬
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Skittles
+                                    </h3>
+
+                                    <span>
+                                        Colorful sweet candy.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $45
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Skittles"
+                                    data-price="45"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- HOT DOG -->
+
+                            <div
+                                class="food-card"
+                                data-name="Hot Dog"
+                                data-price="60">
+
+                                <div class="food-image">
+                                    🌭
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Hot Dog
+                                    </h3>
+
+                                    <span>
+                                        Classic pub hot dog.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $60
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Hot Dog"
+                                    data-price="60"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- HAM SANDWICH -->
+
+                            <div
+                                class="food-card"
+                                data-name="Ham Sandwich"
+                                data-price="60">
+
+                                <div class="food-image">
+                                    🥪
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Ham Sandwich
+                                    </h3>
+
+                                    <span>
+                                        Fresh ham sandwich.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $60
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Ham Sandwich"
+                                    data-price="60"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- NACHOS -->
+
+                            <div
+                                class="food-card"
+                                data-name="Nachos"
+                                data-price="50">
+
+                                <div class="food-image">
+                                    🌮
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Nachos
+                                    </h3>
+
+                                    <span>
+                                        Crispy loaded nachos.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $50
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Nachos"
+                                    data-price="50"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- TOYTO CHIPS -->
+
+                            <div
+                                class="food-card"
+                                data-name="Toyto Chips"
+                                data-price="20">
+
+                                <div class="food-image">
+                                    🍟
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Toyto Chips
+                                    </h3>
+
+                                    <span>
+                                        Classic Irish chips.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $20
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Toyto Chips"
+                                    data-price="20"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- SHEPHERD'S PIE -->
+
+                            <div
+                                class="food-card"
+                                data-name="Shepherd's pie"
+                                data-price="75">
+
+                                <div class="food-image">
+                                    🥧
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Shepherd's Pie
+                                    </h3>
+
+                                    <span>
+                                        Traditional Irish comfort food.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $75
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Shepherd's pie"
+                                    data-price="75"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- FISH AND CHIPS -->
+
+                            <div
+                                class="food-card"
+                                data-name="Fish And Chips"
+                                data-price="80">
+
+                                <div class="food-image">
+                                    🐟
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Fish And Chips
+                                    </h3>
+
+                                    <span>
+                                        Crispy fish with golden chips.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $80
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Fish And Chips"
+                                    data-price="80"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- FRIES -->
+
+                            <div
+                                class="food-card"
+                                data-name="Fries"
+                                data-price="80">
+
+                                <div class="food-image">
+                                    🍟
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Fries
+                                    </h3>
+
+                                    <span>
+                                        Golden crispy fries.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $80
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Fries"
+                                    data-price="80"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         DRINKS
+                    ================================================== -->
+
+                    <div class="drinks-section">
+
+                        <div class="menu-section-header">
+
+                            <div>
+
+                                <span class="section-kicker">
+                                    IRISH PUB BAR
+                                </span>
+
+                                <h2>
+                                    Drinks Items
+                                </h2>
+
+                            </div>
+
+                            <span class="item-count">
+                                17 ITEMS
+                            </span>
+
+                        </div>
+
+
+                        <div class="menu-grid">
+
+
+                            <!-- IRISH COFFEE -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Irish Coffee"
+                                data-price="50">
+
+                                <div class="food-image">
+                                    ☕
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Irish Coffee
+                                    </h3>
+
+                                    <span>
+                                        Classic Irish coffee.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $50
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Irish Coffee"
+                                    data-price="50"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- GUINNESS -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Guinness"
+                                data-price="40">
+
+                                <div class="food-image">
+                                    🍺
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Guinness
+                                    </h3>
+
+                                    <span>
+                                        Classic Irish stout.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $40
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Guinness"
+                                    data-price="40"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- JAMESON -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Jameson"
+                                data-price="180">
+
+                                <div class="food-image">
+                                    🥃
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Jameson
+                                    </h3>
+
+                                    <span>
+                                        Irish whiskey.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $180
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Jameson"
+                                    data-price="180"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- WHISKEY -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Whiskey"
+                                data-price="170">
+
+                                <div class="food-image">
+                                    🥃
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Whiskey
+                                    </h3>
+
+                                    <span>
+                                        Premium whiskey.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $170
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Whiskey"
+                                    data-price="170"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- RUM -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Rum"
+                                data-price="90">
+
+                                <div class="food-image">
+                                    🍹
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Rum
+                                    </h3>
+
+                                    <span>
+                                        Classic rum.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $90
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Rum"
+                                    data-price="90"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- VODKA -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Vodka"
+                                data-price="90">
+
+                                <div class="food-image">
+                                    🍸
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Vodka
+                                    </h3>
+
+                                    <span>
+                                        Premium vodka.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $90
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Vodka"
+                                    data-price="90"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- TEQUILA -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Tequila"
+                                data-price="80">
+
+                                <div class="food-image">
+                                    🥃
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Tequila
+                                    </h3>
+
+                                    <span>
+                                        Classic tequila.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $80
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Tequila"
+                                    data-price="80"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- ABSINTHE -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Absinthe"
+                                data-price="140">
+
+                                <div class="food-image">
+                                    🍸
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Absinthe
+                                    </h3>
+
+                                    <span>
+                                        Strong premium spirit.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $140
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Absinthe"
+                                    data-price="140"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- BEER -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Beer"
+                                data-price="120">
+
+                                <div class="food-image">
+                                    🍺
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Beer
+                                    </h3>
+
+                                    <span>
+                                        Cold pub beer.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $120
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Beer"
+                                    data-price="120"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- CIDER -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Cider"
+                                data-price="100">
+
+                                <div class="food-image">
+                                    🍎
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Cider
+                                    </h3>
+
+                                    <span>
+                                        Fresh pub cider.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $100
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Cider"
+                                    data-price="100"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- SWEET TEA -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Sweet Tea"
+                                data-price="50">
+
+                                <div class="food-image">
+                                    🫖
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Sweet Tea
+                                    </h3>
+
+                                    <span>
+                                        Refreshing sweet tea.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $50
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Sweet Tea"
+                                    data-price="50"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- GREEN COW -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Green Cow"
+                                data-price="60">
+
+                                <div class="food-image">
+                                    🥤
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Green Cow
+                                    </h3>
+
+                                    <span>
+                                        Special pub drink.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $60
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Green Cow"
+                                    data-price="60"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- WATER -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Water"
+                                data-price="20">
+
+                                <div class="food-image">
+                                    💧
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Water
+                                    </h3>
+
+                                    <span>
+                                        Fresh bottled water.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $20
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Water"
+                                    data-price="20"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- DELICIOUS SMOOTHIE -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Delicious Smoothie"
+                                data-price="80">
+
+                                <div class="food-image">
+                                    🥤
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Delicious Smoothie
+                                    </h3>
+
+                                    <span>
+                                        Fresh fruit smoothie.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $80
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Delicious Smoothie"
+                                    data-price="80"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- SUSPICIOUS SMOOTHIE -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Suspicious Smoothie"
+                                data-price="80">
+
+                                <div class="food-image">
+                                    🧪
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Suspicious Smoothie
+                                    </h3>
+
+                                    <span>
+                                        A mysterious pub special.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $80
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Suspicious Smoothie"
+                                    data-price="80"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- SPRUNK -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Sprunk"
+                                data-price="70">
+
+                                <div class="food-image">
+                                    🥤
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Sprunk
+                                    </h3>
+
+                                    <span>
+                                        Cold soft drink.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $70
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Sprunk"
+                                    data-price="70"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- COCA COLA -->
+
+                            <div
+                                class="food-card special"
+                                data-name="Coca Cola"
+                                data-price="60">
+
+                                <div class="food-image">
+                                    🥤
+                                </div>
+
+                                <div class="food-info">
+
+                                    <h3>
+                                        Coca Cola
+                                    </h3>
+
+                                    <span>
+                                        Classic soft drink.
+                                    </span>
+
+                                </div>
+
+                                <strong>
+                                    $60
+                                </strong>
+
+                                <button
+                                    class="add-btn"
+                                    data-name="Coca Cola"
+                                    data-price="60"
+                                    type="button">
+                                    ADD
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     ONLY ONE ORDER PANEL
+                ================================================== -->
+
+                <div class="order-panel">
+
+                    <div class="order-header">
+
+                        <div>
+
+                            <span class="section-kicker">
+                                CURRENT ORDER
+                            </span>
+
+                            <h2>
+                                Selected Items
+                            </h2>
+
+                        </div>
+
+                        <button
+                            class="clear-btn"
+                            id="clearOrderButton"
+                            type="button">
+                            CLEAR
+                        </button>
+
+                    </div>
+
+
+                    <!-- SELECTED ITEMS -->
+
+                    <div
+                        class="order-list"
+                        id="orderList">
+
+                        <div class="empty-order">
+                            No items added yet.
+                        </div>
+
+                    </div>
+
+
+                    <!-- DISCOUNT -->
+
+                    <div class="discount-box">
+
+                        <label for="discount">
+                            Discount
+                        </label>
+
+                        <div class="discount-input">
+
+                            <span>
+                                $
+                            </span>
+
+                            <input
+                                id="discount"
+                                type="number"
+                                min="0"
+                                value="0"
+                                placeholder="0">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TOTAL -->
+
+                    <div class="summary">
+
+                        <div>
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <strong id="subtotal">
+                                $0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Tax 5%
+                            </span>
+
+                            <strong id="tax">
+                                $0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="grand-total">
+
+                            <span>
+                                Grand Total
+                            </span>
+
+                            <strong id="grandTotal">
+                                $0.00
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COMPLETE SALE -->
+
+                    <button
+                        class="complete-sale"
+                        id="completeSaleButton"
+                        type="button">
+                        COMPLETE SALE
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section
+            class="page"
+            id="dashboardPage">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="page-kicker">
+                        IRISH PUB
+                    </span>
+
+                    <h1>
+                        Dashboard
+                    </h1>
+
+                    <p>
+                        Monitor pub sales, orders and staff performance.
+                    </p>
+
+                </div>
+
+
+                <div class="dashboard-actions">
+
+                    <button
+                        class="gold-button"
+                        id="refreshDashboard"
+                        type="button">
+                        ↻ Refresh
+                    </button>
+
+
+                    <button
+                        id="resetDashboard"
+                        class="danger-button"
+                        type="button">
+                        🗑 Reset Data
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STAT CARDS -->
+
+            <div class="dashboard-stats">
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-icon">
+                        💰
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Sales
+                        </span>
+
+                        <strong id="dashboardTotalSales">
+                            $0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-icon">
+                        🧾
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Orders
+                        </span>
+
+                        <strong id="dashboardTotalOrders">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-icon">
+                        ⏱
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Duty Time
+                        </span>
+
+                        <strong id="dashboardTotalDuty">
+                            0h 0m
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="dashboard-card">
+
+                    <div class="dashboard-icon">
+                        📅
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Today's Sales
+                        </span>
+
+                        <strong id="dashboardTodaySales">
+                            $0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STAFF PERFORMANCE -->
+
+            <div class="dashboard-section">
+
+                <div class="section-title-row">
+
+                    <div>
+
+                        <h2>
+                            Staff Performance
+                        </h2>
+
+                        <p>
+                            Sales and duty performance by staff member.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-table-wrapper">
+
+                    <table class="dashboard-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Staff
+                                </th>
+
+                                <th>
+                                    Role
+                                </th>
+
+                                <th>
+                                    Sales
+                                </th>
+
+                                <th>
+                                    Orders
+                                </th>
+
+                                <th>
+                                    Duty Time
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="staffTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="empty-dashboard">
+
+                                    Loading staff data...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RECENT SALES -->
+
+            <div class="dashboard-section">
+
+                <div class="section-title-row">
+
+                    <div>
+
+                        <h2>
+                            Recent Sales
+                        </h2>
+
+                        <p>
+                            Latest completed customer sales.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="recent-sales-list"
+                    id="recentSalesList">
+
+                    <div class="empty-dashboard">
+                        No sales recorded yet
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             STAFF & POSITION
+        ================================================== -->
+
+        <section
+            class="page"
+            id="staffPage">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="page-kicker">
+                        IRISH PUB
+                    </span>
+
+                    <h1>
+                        Staff & Position
+                    </h1>
+
+                    <p>
+                        Manage staff positions and access permissions.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-section">
+
+                <div class="section-title-row">
+
+                    <div>
+
+                        <h2>
+                            Staff Access
+                        </h2>
+
+                        <p>
+                            Assign Owner, Manager or Staff permissions.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="staffPositionList">
+
+                    <div class="empty-dashboard">
+                        Loading staff...
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="staffPositionMessage"
+                    style="
+                        display:none;
+                        margin-top:15px;
+                        padding:12px 14px;
+                        border-radius:10px;
+                        font-size:13px;
+                    ">
+                </div>
+
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:flex-end;
+                        margin-top:20px;
+                    ">
+
+                    <button
+                        class="gold-button"
+                        id="saveStaffPositions"
+                        type="button">
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

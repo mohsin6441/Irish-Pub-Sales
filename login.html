@@ -1,0 +1,414 @@
+const express = require("express");
+const session = require("express-session");
+const path = require("path");
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  session({
+    secret: "irish-pub-management-secret-2026",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      maxAge: 8 * 60 * 60 * 1000
+    }
+  })
+);
+
+/* =========================
+   USERS
+========================= */
+
+const users = [
+  {
+    username: "owner",
+    password: "1234",
+    name: "Mohsin",
+    role: "Owner"
+  },
+  {
+    username: "manager",
+    password: "1234",
+    name: "Manager",
+    role: "Manager"
+  },
+  {
+    username: "staff1",
+    password: "1234",
+    name: "Alison Burgurs",
+    role: "Staff"
+  },
+  {
+    username: "staff2",
+    password: "1234",
+    name: "Staff 2",
+    role: "Staff"
+  }
+];
+
+/* =========================
+   DATA STORAGE
+========================= */
+
+const shifts = [];
+const sales = [];
+
+/* =========================
+   LOGIN PAGE
+========================= */
+
+app.get("/", (req, res) => {
+  if (req.session.user) {
+    return res.redirect("/home");
+  }
+
+  res.sendFile(path.join(__dirname, "login.html"));
+});
+
+/* =========================
+   LOGIN
+========================= */
+
+app.post("/api/login", (req, res) => {
+  const username = String(req.body.username || "").trim();
+  const password = String(req.body.password || "").trim();
+
+  const user = users.find(
+    (item) =>
+      item.username === username &&
+      item.password === password
+  );
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid username or password."
+    });
+  }
+
+  req.session.user = {
+    username: user.username,
+    name: user.name,
+    role: user.role
+  };
+
+  res.json({
+    success: true,
+    message: "Login successful."
+  });
+});
+
+/* =========================
+   CURRENT USER
+========================= */
+
+app.get("/api/me", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      loggedIn: false
+    });
+  }
+
+  res.json({
+    loggedIn: true,
+    user: req.session.user
+  });
+});
+
+/* =========================
+   START SHIFT
+========================= */
+
+app.post("/api/shift/start", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You are not logged in."
+    });
+  }
+
+  const username = req.session.user.username;
+
+  const existingShift = shifts.find(
+    (shift) =>
+      shift.username === username &&
+      shift.active === true
+  );
+
+  if (existingShift) {
+    return res.status(400).json({
+      success: false,
+      message: "Your shift is already active."
+    });
+  }
+
+  const shift = {
+    id: Date.now(),
+    username,
+    name: req.session.user.name,
+    role: req.session.user.role,
+    startTime: new Date().toISOString(),
+    endTime: null,
+    duration: 0,
+    active: true
+  };
+
+  shifts.push(shift);
+
+  res.json({
+    success: true,
+    message: "Shift started.",
+    shift
+  });
+});
+
+/* =========================
+   CURRENT SHIFT
+========================= */
+
+app.get("/api/shift/current", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      active: false
+    });
+  }
+
+  const shift = shifts.find(
+    (item) =>
+      item.username === req.session.user.username &&
+      item.active === true
+  );
+
+  if (!shift) {
+    return res.json({
+      active: false
+    });
+  }
+
+  res.json({
+    active: true,
+    shift
+  });
+});
+
+/* =========================
+   END SHIFT
+========================= */
+
+app.post("/api/shift/end", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You are not logged in."
+    });
+  }
+
+  const shift = shifts.find(
+    (item) =>
+      item.username === req.session.user.username &&
+      item.active === true
+  );
+
+  if (!shift) {
+    return res.status(400).json({
+      success: false,
+      message: "No active shift found."
+    });
+  }
+
+  const endTime = new Date();
+  const startTime = new Date(shift.startTime);
+
+  const duration = Math.floor(
+    (endTime - startTime) / 1000
+  );
+
+  shift.endTime = endTime.toISOString();
+  shift.duration = duration;
+  shift.active = false;
+
+  res.json({
+    success: true,
+    message: "Shift ended.",
+    shift
+  });
+});
+
+/* =========================
+   CREATE SALE
+========================= */
+
+app.post("/api/sales", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You are not logged in."
+    });
+  }
+
+  const {
+    items,
+    subtotal,
+    discount,
+    tax,
+    total
+  } = req.body;
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No items in order."
+    });
+  }
+
+  const sale = {
+    id: Date.now(),
+    username: req.session.user.username,
+    staffName: req.session.user.name,
+    items,
+    subtotal: Number(subtotal) || 0,
+    discount: Number(discount) || 0,
+    tax: Number(tax) || 0,
+    total: Number(total) || 0,
+    createdAt: new Date().toISOString()
+  };
+
+  sales.push(sale);
+
+  res.json({
+    success: true,
+    message: "Sale completed.",
+    sale
+  });
+});
+
+/* =========================
+   DASHBOARD
+========================= */
+
+app.get("/api/dashboard", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({
+      success: false,
+      message: "You are not logged in."
+    });
+  }
+
+  const allowedRoles = ["Owner", "Manager"];
+
+  if (!allowedRoles.includes(req.session.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: "You do not have permission to view the dashboard."
+    });
+  }
+
+  const staffStats = {};
+
+  users.forEach((user) => {
+    let totalSales = 0;
+    let totalOrders = 0;
+    let totalDutyTime = 0;
+
+    sales.forEach((sale) => {
+      if (sale.username === user.username) {
+        totalSales += sale.total;
+        totalOrders++;
+      }
+    });
+
+    shifts.forEach((shift) => {
+      if (shift.username === user.username) {
+        if (shift.active) {
+          const currentDuration =
+            Math.floor(
+              (Date.now() -
+                new Date(shift.startTime).getTime()) /
+                1000
+            );
+
+          totalDutyTime += currentDuration;
+        } else {
+          totalDutyTime += shift.duration;
+        }
+      }
+    });
+
+    staffStats[user.username] = {
+      username: user.username,
+      name: user.name,
+      role: user.role,
+      totalSales,
+      totalOrders,
+      totalDutyTime
+    };
+  });
+
+  const totalSales = sales.reduce(
+    (sum, sale) => sum + sale.total,
+    0
+  );
+
+  res.json({
+    success: true,
+    totalSales,
+    totalOrders: sales.length,
+    staff: Object.values(staffStats)
+  });
+});
+
+/* =========================
+   LOGOUT
+========================= */
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed."
+      });
+    }
+
+    res.clearCookie("connect.sid");
+
+    res.json({
+      success: true
+    });
+  });
+});
+
+/* =========================
+   HOME
+========================= */
+
+app.get("/home", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  res.sendFile(
+    path.join(__dirname, "index.html")
+  );
+});
+
+/* =========================
+   STATIC FILES
+========================= */
+
+app.use(express.static(__dirname));
+
+/* =========================
+   START SERVER
+========================= */
+
+app.listen(PORT, () => {
+  console.log(
+    `Irish Pub running at http://localhost:${PORT}`
+  );
+});
